@@ -1,0 +1,14 @@
+{
+    "Accounts": [
+        {
+            "strUn":    "testaccount@contoso.com.au",
+            "strTd":    "contoso.com.au",
+            "strPw":    "********"
+        },
+        {
+            "strUn":    "serviceAccount@companyx.it",
+            "strTd":    "companyx.it",
+            "strPw":    "********"
+        }
+    ]
+}
