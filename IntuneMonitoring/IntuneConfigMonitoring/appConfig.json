@@ -1,0 +1,10 @@
+{
+    "BasicConfig": 
+        {
+            "tenant" : "contoso.com.au",
+            "query" : "deviceManagementScripts",
+            "currentSnapshot" : "https://storageaccountURL.blob.core.windows.net/ContainerName/$($tenant)_$($query).json?SuperSecretSASCode",
+            "graphConnectorURI" : "https://graphconnectorPOC.azurewebsites.net/api/GraphConnector?code=SuperSecretCode",
+            "graphVer": "beta"
+        }
+}

@@ -1,0 +1,7 @@
+{
+    "BasicConfig": 
+        {
+            "graphConnectorURI" : "https://functionURL.azurewebsites.net/api/FunctionName?code=SuperSecreCode==",
+            "graphVer" : "beta"
+        }
+}
