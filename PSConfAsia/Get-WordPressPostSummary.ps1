@@ -7,23 +7,31 @@ function Get-WordPressPostSummary {
         $result = @()
         foreach ($blog in $url) {
             $hostName = $blog -replace '(^http:\/\/)|(\/$)', ''
-            $iwr = Invoke-WebRequest -Method Get -UseBasicParsing `
-                -Uri "http://$($hostName)/wp-json/wp/v2/posts"
+            try {
+                $iwr = Invoke-WebRequest -Method Get -UseBasicParsing `
+                    -Uri "http://$($hostName)/wp-json/wp/v2/posts"
+                
+            }
+            catch {
+                $iwr = Invoke-WebRequest -Method Get -UseBasicParsing `
+                    -Uri "http://$($hostName)/?rest_route=/wp/v2/posts"
+            }
             if ($iwr.StatusCode -eq 200) {
                 $jsonContent = $iwr.Content | ConvertFrom-Json
                 foreach ($post in $jsonContent) {
                     $result += [PSCustomObject]@{
                         Date    = get-date $($post.date)
+                        Link    = [System.Web.HttpUtility]::HtmlDecode($post.link)
                         Title   = [System.Web.HttpUtility]::HtmlDecode($post.title.rendered)
                         Excerpt = [System.Web.HttpUtility]::HtmlDecode($post.excerpt.rendered) `
-                            -replace '<\/?p>', ""
+                            -replace '\<\/?.*?\>', ""
                     }
                 }
             }
         }
-            if ($result) {
-                return $result
-            }
+        if ($result) {
+            return $result | Sort-Object -Property Date -Descending
+        }
         else {
             Throw $iwr.StatusCode
         }
@@ -32,4 +40,4 @@ function Get-WordPressPostSummary {
         Write-Warning $_.Exception.Message
     }
 }
-Get-WordPressPostSummary -url "powers-hell.com", "blog.vigilant.it"
+Get-WordPressPostSummary -url "blog.vigilant.it", "powers-hell.com", "steven.hosking.com.au"
