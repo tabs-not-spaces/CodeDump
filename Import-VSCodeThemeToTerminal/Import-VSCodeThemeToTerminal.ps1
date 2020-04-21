@@ -1,3 +1,8 @@
+param (
+    [parameter(Mandatory = $true)]
+    [String]$themeName
+)
+#region Functions
 function Get-VSCodeTheme {
     [cmdletbinding()]
     param (
@@ -40,7 +45,6 @@ function Get-VSCodeTheme {
         Write-Warning $_
     }
 }
-
 function Import-VSCodeThemeToTerminal {
     [cmdletbinding()]
     param (
@@ -113,7 +117,8 @@ function Import-VSCodeThemeToTerminal {
         Write-Warning $_
     }
 }
-
-$themes = Get-VSCodeTheme -themePath "$env:UserProfile\.vscode\extensions\monokai.theme-monokai-pro-vscode-1.1.15"
+#endregion
+$themePath = (Resolve-Path "$env:UserProfile\.vscode\extensions\$themeName*").Path
+$themes = Get-VSCodeTheme -themePath $themePath
 $theme = $themes | Out-GridView -PassThru
 Import-VSCodeThemeToTerminal -theme $theme
