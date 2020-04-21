@@ -1,0 +1,77 @@
+### variables
+@resourceURL = htts://graph.microsoft.com
+@applicationId = 00000000-0000-0000-0000-0000v00000000
+@upn = user@contoso.com
+@password = superSecretPassword
+@contentType = application/json
+@authorization = Bearer {{auth.response.body.access_token}}
+@baseUrl = https://graph.microsoft.com/beta/deviceManagement
+
+### Authenticate to Graph
+// @name auth
+GET https://login.microsoftonline.com/Common/oauth2/token HTTP/1.1
+
+resource={{resourceURL}}
+&client_id={{applicationId}}
+&grant_type=password
+&username={{upn}}
+&scope=openid
+&password={{password}}
+
+### List all available templates
+// @name templates
+GET {{baseUrl}}/templates HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: {{authorization}}
+
+### Select BitLocker template
+// @name bitlocker
+GET {{baseUrl}}/templates?$filter=startswith(displayName,'BitLocker') HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: {{authorization}}
+
+### Create new BitLocker Instance
+// @name newBitlocker
+POST {{baseUrl}}/templates/{{bitlocker.response.body.value[0].id}}/createInstance HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: {{authorization}}
+
+{
+    "displayName": "Win10_BitLocker_Test",
+    "description": "Win10_BitLocker_Test",
+    "templateId": "{{bitlocker.response.body.value[0].id}}"
+}
+
+### Update instance settings
+@definitionBase = deviceConfiguration--windows10EndpointProtectionConfiguration_
+POST {{baseUrl}}/intents/{{newBitlocker.response.body.id}}/updateSettings HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: {{authorization}}
+
+{
+    "settings": [{
+        "@odata.type": "#microsoft.graph.deviceManagementBooleanSettingInstance",
+        "definitionId": "{{definitionBase}}bitLockerEncryptDevice",
+        "value": true
+    },
+    {
+        "@odata.type": "#microsoft.graph.deviceManagementBooleanSettingInstance",
+        "definitionId": "{{definitionBase}}bitLockerEnableStorageCardEncryptionOnMobile",
+        "value": true
+    },
+    {
+        "@odata.type": "#microsoft.graph.deviceManagementBooleanSettingInstance",
+        "definitionId": "{{definitionBase}}bitLockerDisableWarningForOtherDiskEncryption",
+        "value": true
+    },
+    {
+        "@odata.type": "#microsoft.graph.deviceManagementBooleanSettingInstance",
+        "definitionId": "{{definitionBase}}bitLockerAllowStandardUserEncryption",
+        "value": true
+    },
+    {
+        "@odata.type": "#microsoft.graph.deviceManagementStringSettingInstance",
+        "definitionId": "{{definitionBase}}bitLockerRecoveryPasswordRotation",
+        "value": "notConfigured"
+    }]
+}
