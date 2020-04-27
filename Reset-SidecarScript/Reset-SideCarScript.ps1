@@ -1,30 +1,9 @@
-function Get-IntuneToken {
-    param (
-        $credential,
-        $token
-    )
-    if (!(Get-Module -Name MSGraphIntuneManagement -ListAvailable -ErrorAction SilentlyContinue)) {
-        Install-Module -Name MSGraphIntuneManagement -Scope CurrentUser -Verbose -Force
-    }
-    $GMTDate = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($(Get-Date), [System.TimeZoneInfo]::Local.Id, 'GMT Standard Time')
-    if ($token -ne $null) {
-        $tokenExpDate = ([System.DateTimeOffset]$token.ExpiresOn).DateTime
-        if ($GMTDate -le $tokenExpDate) {
-            write-host "Token is still fresh." -ForegroundColor Green
-            return $token
-        }
-        #token is technically expired or never existed.
-    }
-    Write-Host "Token is stale or never existed." -ForegroundColor Red
-    $clientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547"
-    $token = Get-MSGraphAuthenticationToken -Credential $Credential -ClientId $ClientId
-    return $token
+if (!(Get-Module -Name MSAL.PS -ListAvailable -ErrorAction SilentlyContinue)) {
+    Install-Module -Name MSAL.PS -Scope CurrentUser -Force
 }
-if (!($cred)) {
-    $cred = Get-Credential
-}
-
-$token = Get-IntuneToken -credential $cred -token $token
+$clientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547" # well known Intune application Id
+$auth = Get-MsalToken -ClientId $clientId -deviceCode #deviceCode requires interaction and solves MFA challenges
+$token = @{ Authorization = $auth.CreateAuthorizationHeader() }
 
 $graph = "https://graph.microsoft.com"
 $deviceProps = (invoke-RestMethod -Method Get -Uri "https://graph.microsoft.com/v1.0/devices?`$filter=DisplayName eq '$env:ComputerName'" -Headers $token).value
