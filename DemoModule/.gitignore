@@ -1,0 +1,6 @@
+.tests
+.vscode
+bin
+.exe
+.msi
+.nupkg
