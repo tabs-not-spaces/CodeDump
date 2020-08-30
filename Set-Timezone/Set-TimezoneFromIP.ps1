@@ -1,3 +1,4 @@
+$apiKey = '000000000000000000000000000000' #use a subscription key from your Azure Maps Account
 function ConvertFrom-IanaName {
     [cmdletbinding()]
     param (
@@ -379,6 +380,8 @@ function ConvertFrom-IanaName {
         return $result.Value
     }
 }
-$result = Invoke-RestMethod 'https://ipinfo.io?token={{ApiToken}}' -ContentType 'Application/Json'
-$timezone = ConvertFrom-IanaName -IanaName $result.timezone
-Set-TimeZone -Id (Get-WindowsTimezoneFromUnix -TZName $tz.timezone)
+
+$locData = Invoke-RestMethod "https://ipinfo.io?token=$apiKey" -ContentType 'Application/Json'
+$windowsId = ConvertFrom-IanaName -IanaName $locData.timezone
+Write-Host "Setting timezone to $($timezone.WindowsId)"
+Set-Timezone -Id $windowsId
