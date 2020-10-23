@@ -383,5 +383,5 @@ function ConvertFrom-IanaName {
 
 $locData = Invoke-RestMethod "https://ipinfo.io?token=$apiKey" -ContentType 'Application/Json'
 $windowsId = ConvertFrom-IanaName -IanaName $locData.timezone
-Write-Host "Setting timezone to $($timezone.WindowsId)"
+Write-Host "Setting timezone to $windowsId"
 Set-Timezone -Id $windowsId
