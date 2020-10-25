@@ -1,9 +1,24 @@
 #region printer list
 $availablePrinters = @(
     [pscustomobject]@{
-        SharedID   = '6f4387af-dadb-4391-a984-477fa3c40224'
-        SharedName = 'HP Universal Printing PCL 6'
+        SharedID   = '2f8aa4d8-8c21-4d37-9506-3da446bcf9ea'
+        SharedName = 'Printer A'
         IsDefault  = 'Yes'
+    }
+    [pscustomobject]@{
+        SharedID   = 'c288bc70-8e14-4c5b-9f82-428ecf3ab63a'
+        SharedName = 'Printer B'
+        IsDefault  = $null
+    }
+    [pscustomobject]@{
+        SharedID   = '478a29db-7bdd-46a7-a75e-e0d61167988c'
+        SharedName = 'Printer C'
+        IsDefault  = $null
+    }
+    [pscustomobject]@{
+        SharedID   = '896262c5-59ca-4b92-becf-074feb25fccc'
+        SharedName = 'Printer D'
+        IsDefault  = $null
     }
 )
 #endregion

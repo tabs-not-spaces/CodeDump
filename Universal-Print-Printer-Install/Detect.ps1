@@ -1,5 +1,10 @@
 #region printer list
-$availablePrinters = @("HP Universal Printing PCL 6")
+$availablePrinters = @(
+    "Printer A"
+    "Printer B"
+    "Printer C"
+    "Printer D"
+)
 $notFound = 0
 #endregion
 #region check the printers exist
@@ -29,5 +34,4 @@ finally {
         }
     }
 }
-
 #endregion
