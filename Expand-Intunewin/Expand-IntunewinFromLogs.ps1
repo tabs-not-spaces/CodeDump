@@ -3,14 +3,14 @@ function Expand-IntuneWin {
     param (
         $inputFile,
         $outputFolder,
-        $key,
-        $iv
+        $encKey,
+        $encIV
     )
     try {
         #region generate crypto and decrypt objects
         $aes = [System.Security.Cryptography.Aes]::Create()
-        $aes.Key = [system.convert]::FromBase64String($key)
-        $aes.IV = [system.convert]::FromBase64String($iv)
+        $aes.Key = [system.convert]::FromBase64String($encKey)
+        $aes.IV = [system.convert]::FromBase64String($encIv)
         $decryptor = $aes.CreateDecryptor($aes.Key, $aes.IV)
         #endregion
         #region decrypt the target file

@@ -15,17 +15,17 @@ function Decrypt($base64string) {
 $agentLogPath = Join-Path $env:ProgramData "Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log"
 $stringToSearch = "<![LOG[Get content info from service,ret = {"
 
-Get-Content $agentLogPath | ForEach-Object {
+$res = Get-Content $agentLogPath | ForEach-Object {
     if ($nextLine) {
         $reply = "{$($_.ToString().TrimStart())}" | ConvertFrom-Json
         $responsePayload = ($reply.ResponsePayload | ConvertFrom-Json)
         $contentInfo = ($responsePayload.ContentInfo | ConvertFrom-Json)
         $decryptInfo = Decrypt(([xml]$responsePayload.DecryptInfo).EncryptedMessage.EncryptedContent) | ConvertFrom-Json
-#
-        "URL: $($contentInfo.UploadLocation)"
-        "Key: $($decryptInfo.EncryptionKey)"
-        "IV:  $($decryptInfo.IV)"
-
+        [PSCustomObject]@{
+            URL = $($contentInfo.UploadLocation)
+            Key = $($decryptInfo.EncryptionKey)
+            IV  = $($decryptInfo.IV)
+        }
         # optional call:
         #. C:\bin\IntuneWinAppUtilDecoder.exe `"$($contentInfo.UploadLocation)`" /key:$($decryptInfo.EncryptionKey) /iv:$($decryptInfo.IV)
 
@@ -35,3 +35,4 @@ Get-Content $agentLogPath | ForEach-Object {
         $nextLine = $true
     }
 }
+return $res
