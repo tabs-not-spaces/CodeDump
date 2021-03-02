@@ -38,6 +38,22 @@ Function Set-LocalPrinters {
     }
 }
 #endregion
+#region Printers to install
+$printers = @(
+    [PSCustomObject]@{
+        Printer = "MainPrinter"
+        Server = "print1.powers-hell.com"
+    }
+    [PSCustomObject]@{
+        Printer = "FrontDeskPrinter"
+        Server = "print1.powers-hell.com"
+    }
+    [PSCustomObject]@{
+        Printer = "BackupPrinter"
+        Server = "print2.powers-hell.com"
+    }
+)
+#endregion
 #region Install printers
 foreach ($p in $printers) {
     Set-LocalPrinters -server $p.Server -printerName $p.Printer
