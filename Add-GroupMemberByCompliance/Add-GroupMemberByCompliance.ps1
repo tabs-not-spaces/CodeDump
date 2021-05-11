@@ -16,8 +16,7 @@ param (
     [int32]$HourOffset
 )
 #region Config
-[datetime]$date = (Get-Date).AddHours($HourOffset).ToUniversalTime()
-[string]$dateFormatted = $date.ToString('o')
+[string]$dateFormatted = [datetime]::UtcNow.AddHours($HourOffset).ToString('o')
 [string]$baseGraphUri = 'https://graph.microsoft.com/beta'
 #endregion
 #region Functions
