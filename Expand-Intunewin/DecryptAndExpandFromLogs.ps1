@@ -1,7 +1,12 @@
+[cmdletbinding()]
+param (
+    $AgentLogPath = $(Join-Path $env:ProgramData "Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log"),
+    $DestinationPath = "C:\bin"
+)
 #region config
-$agentLogPath = Join-Path $env:ProgramData "Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log"
+#$agentLogPath = Join-Path $env:ProgramData "Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log"
 $stringToSearch = "<![LOG[Get content info from service,ret = {"
-$path = "C:\bin"
+$path = $DestinationPath
 #endregion
 #region functions
 function Decrypt($base64string) {
