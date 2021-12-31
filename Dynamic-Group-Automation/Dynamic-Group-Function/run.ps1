@@ -2,7 +2,7 @@ using namespace System.Net
 # Input bindings are passed in via param block.
 param($Request, $TriggerMetadata)
 $result = [System.Collections.ArrayList]::new()
-$expectedComplianceValue = "compliant"
+$expectedComplianceValue = "noncompliant"
 <# 
 Make sure the following application settings // 
 variables are configured before running
