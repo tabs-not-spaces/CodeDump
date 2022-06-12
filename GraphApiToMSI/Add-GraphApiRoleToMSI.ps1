@@ -1,4 +1,4 @@
-Function Add-GraphApiRoleToMSI {
+function Add-GraphApiRoleToMSI {
     [cmdletbinding()]
     param (
         [parameter(Mandatory = $true)]
