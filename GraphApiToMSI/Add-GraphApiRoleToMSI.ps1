@@ -6,7 +6,10 @@ function Add-GraphApiRoleToMSI {
         [string]$ApplicationName,
 
         [parameter(Mandatory = $true)]
-        [string[]]$GraphApiRole
+        [string[]]$GraphApiRole,
+
+        [parameter(mandatory = $true)]
+        [string]$Token
     )
 
     $baseUri = 'https://graph.microsoft.com/v1.0/servicePrincipals'
@@ -17,24 +20,24 @@ function Add-GraphApiRoleToMSI {
         $msiParams = @{
             Method  = 'Get'
             Uri     = '{0}?$search={1}' -f $baseUri, $spSearchFiler
-            Headers = @{Authorization = "Bearer $token"; ConsistencyLevel = "eventual" }
+            Headers = @{Authorization = "Bearer $Token"; ConsistencyLevel = "eventual" }
         }
         $spList = (Invoke-RestMethod @msiParams).Value
         $msiId = ($spList | Where-Object { $_.displayName -eq $applicationName }).Id
-        $graphId = ($spList | Where-Object { $_.appId -eq $graphAppId }).Id
+        $GraphId = ($spList | Where-Object { $_.appId -eq $graphAppId }).Id
         $msiItem = Invoke-RestMethod @msiParams -Uri "$($baseUri)/$($msiId)?`$expand=appRoleAssignments"
 
-        $graphRoles = (Invoke-RestMethod @msiParams -Uri "$baseUri/$($graphId)/appRoles").Value | 
+        $graphRoles = (Invoke-RestMethod @msiParams -Uri "$baseUri/$($GraphId)/appRoles").Value | 
         Select-Object AllowedMemberTypes, id, value
         foreach ($role in $GraphApiRole) {
             $roleItem = $graphRoles | Where-Object { $_.value -eq $role }
             if ($roleItem.id -notIn $msiItem.appRoleAssignments.appRoleId) {
                 Write-Host "Adding role ($($roleItem.value)) to identity: $($applicationName).."
                 $params = @{
-                    managedIdentityId = $msiId
-                    graphId           = $graphId
-                    apiRoleId         = $roleItem.id
-                    token             = $token
+                    ManagedIdentityId = $msiId
+                    GraphId           = $GraphId
+                    ApiRoleId         = $roleItem.id
+                    Token             = $Token
                 }
                 Send-RoleToMSI @params
             }
@@ -53,29 +56,29 @@ function Send-RoleToMSI {
     [cmdletbinding()]
     param (
         [parameter(Mandatory = $true)]
-        [string]$managedIdentityId,
+        [string]$ManagedIdentityId,
 
         [parameter(Mandatory = $true)]
-        [string]$graphId,
+        [string]$GraphId,
 
         [parameter(Mandatory = $true)]
-        [string]$apiRoleId,
+        [string]$ApiRoleId,
 
         [parameter(Mandatory = $true)]
-        [string]$token
+        [string]$Token
     )
     try {
         $baseUri = 'https://graph.microsoft.com/v1.0/servicePrincipals'
         $body = @{
-            "principalId" = $managedIdentityId
-            "resourceId"  = $graphId
-            "appRoleId"   = $apiRoleId
+            "principalId" = $ManagedIdentityId
+            "resourceId"  = $GraphId
+            "appRoleId"   = $ApiRoleId
         } | ConvertTo-Json
         $restParams = @{
             Method      = "Post"
-            Uri         = "$baseUri/$($graphId)/appRoleAssignedTo"
+            Uri         = "$baseUri/$($GraphId)/appRoleAssignedTo"
             Body        = $body
-            Headers     = @{Authorization = "Bearer $token" }
+            Headers     = @{Authorization = "Bearer $Token" }
             ContentType = 'Application/Json'
         }
         $roleRequest = Invoke-RestMethod @restParams
@@ -86,13 +89,8 @@ function Send-RoleToMSI {
     }
 }
 #endregion
-
-$authParams = @{
-    ClientId   = ""
-    TenantId   = ""
-    DeviceCode = $true
-}
-$token = Get-MsalToken @params
+Connect-AzAccount -Tenant "powers-hell.com"
+$token = Get-AzAccessToken
 $roles = @(
     "DeviceManagementApps.ReadWrite.All", 
     "DeviceManagementConfiguration.Read.All", 
@@ -101,4 +99,4 @@ $roles = @(
     "DeviceManagementServiceConfig.ReadWrite.All", 
     "GroupMember.Read.All"
 )
-Add-GraphApiRoleToMSI -ApplicationName "FunctionAppExample" -GraphApiRole $roles
+Add-GraphApiRoleToMSI -ApplicationName "FunctionAppExample" -GraphApiRole $roles -Token $token.Token
