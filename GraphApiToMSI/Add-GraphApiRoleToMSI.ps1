@@ -1,3 +1,4 @@
+#region Functions
 function Add-GraphApiRoleToMSI {
     [cmdletbinding()]
     param (
@@ -84,7 +85,14 @@ function Send-RoleToMSI {
         Write-Warning $_.Exception.Message
     }
 }
+#endregion
 
+$authParams = @{
+    ClientId   = ""
+    TenantId   = ""
+    DeviceCode = $true
+}
+$token = Get-MsalToken @params
 $roles = @(
     "DeviceManagementApps.ReadWrite.All", 
     "DeviceManagementConfiguration.Read.All", 
@@ -92,5 +100,5 @@ $roles = @(
     "DeviceManagementRBAC.Read.All", 
     "DeviceManagementServiceConfig.ReadWrite.All", 
     "GroupMember.Read.All"
-    )
+)
 Add-GraphApiRoleToMSI -ApplicationName "FunctionAppExample" -GraphApiRole $roles
