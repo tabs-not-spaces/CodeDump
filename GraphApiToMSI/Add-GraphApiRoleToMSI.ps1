@@ -24,10 +24,10 @@ function Add-GraphApiRoleToMSI {
         }
         $spList = (Invoke-RestMethod @msiParams).Value
         $msiId = ($spList | Where-Object { $_.displayName -eq $applicationName }).Id
-        $GraphId = ($spList | Where-Object { $_.appId -eq $graphAppId }).Id
+        $graphId = ($spList | Where-Object { $_.appId -eq $graphAppId }).Id
         $msiItem = Invoke-RestMethod @msiParams -Uri "$($baseUri)/$($msiId)?`$expand=appRoleAssignments"
 
-        $graphRoles = (Invoke-RestMethod @msiParams -Uri "$baseUri/$($GraphId)/appRoles").Value | 
+        $graphRoles = (Invoke-RestMethod @msiParams -Uri "$baseUri/$($graphId)/appRoles").Value | 
         Where-Object { $_.value -in $GraphApiRole -and $_.allowedMemberTypes -Contains "Application" } |
         Select-Object allowedMemberTypes, id, value
         foreach ($roleItem in $graphRoles) {
@@ -35,12 +35,12 @@ function Add-GraphApiRoleToMSI {
                 Write-Host "Adding role ($($roleItem.value)) to identity: $($applicationName).." -ForegroundColor Green
                 $postBody = @{
                     "principalId" = $msiId
-                    "resourceId"  = $GraphId
+                    "resourceId"  = $graphId
                     "appRoleId"   = $roleItem.id
                 }
                 $postParams = @{
                     Method      = 'Post'
-                    Uri         = "$baseUri/$GraphId/appRoleAssignedTo"
+                    Uri         = "$baseUri/$graphId/appRoleAssignedTo"
                     Body        = $postBody | ConvertTo-Json
                     Headers     = $msiParams.Headers
                     ContentType = 'Application/Json'
