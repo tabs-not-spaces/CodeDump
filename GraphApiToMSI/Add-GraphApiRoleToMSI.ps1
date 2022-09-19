@@ -61,6 +61,8 @@ function Add-GraphApiRoleToMSI {
     }
 }
 #endregion
+
+#region How to use the function
 Connect-AzAccount -Tenant "powers-hell.com"
 $token = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com"
 $roles = @(
@@ -72,3 +74,4 @@ $roles = @(
     "GroupMember.Read.All"
 )
 Add-GraphApiRoleToMSI -ApplicationName "FunctionAppExample" -GraphApiRole $roles -Token $token.Token
+#endregion
