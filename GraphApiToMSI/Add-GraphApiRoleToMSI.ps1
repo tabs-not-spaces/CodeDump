@@ -28,21 +28,30 @@ function Add-GraphApiRoleToMSI {
         $msiItem = Invoke-RestMethod @msiParams -Uri "$($baseUri)/$($msiId)?`$expand=appRoleAssignments"
 
         $graphRoles = (Invoke-RestMethod @msiParams -Uri "$baseUri/$($GraphId)/appRoles").Value | 
-        Select-Object AllowedMemberTypes, id, value
-        foreach ($role in $GraphApiRole) {
-            $roleItem = $graphRoles | Where-Object { $_.value -eq $role }
+        Where-Object { $_.value -in $GraphApiRole -and $_.allowedMemberTypes -Contains "Application" } |
+        Select-Object allowedMemberTypes, id, value
+        foreach ($roleItem in $graphRoles) {
             if ($roleItem.id -notIn $msiItem.appRoleAssignments.appRoleId) {
-                Write-Host "Adding role ($($roleItem.value)) to identity: $($applicationName).."
-                $params = @{
-                    ManagedIdentityId = $msiId
-                    GraphId           = $GraphId
-                    ApiRoleId         = $roleItem.id
-                    Token             = $Token
+                Write-Host "Adding role ($($roleItem.value)) to identity: $($applicationName).." -ForegroundColor Green
+                $postBody = @{
+                    "principalId" = $msiId
+                    "resourceId"  = $GraphId
+                    "appRoleId"   = $roleItem.id
                 }
-                Send-RoleToMSI @params
+                $postParams = @{
+                    Method      = 'Post'
+                    Uri         = "$baseUri/$GraphId/appRoleAssignedTo"
+                    Body        = $postBody | ConvertTo-Json
+                    Headers     = $msiParams.Headers
+                    ContentType = 'Application/Json'
+                }
+                $result = Invoke-RestMethod @postParams
+                if ( $PSBoundParameters['Verbose'] -or $VerbosePreference -eq 'Continue' ) {
+                    $result
+                }
             }
             else {
-                Write-Host "role ($($roleItem.value)) already found in $($applicationName).."
+                Write-Host "role ($($roleItem.value)) already found in $($applicationName).." -ForegroundColor Yellow
             }
         }
         
@@ -50,47 +59,10 @@ function Add-GraphApiRoleToMSI {
     catch {
         Write-Warning $_.Exception.Message
     }
-
-}
-function Send-RoleToMSI {
-    [cmdletbinding()]
-    param (
-        [parameter(Mandatory = $true)]
-        [string]$ManagedIdentityId,
-
-        [parameter(Mandatory = $true)]
-        [string]$GraphId,
-
-        [parameter(Mandatory = $true)]
-        [string]$ApiRoleId,
-
-        [parameter(Mandatory = $true)]
-        [string]$Token
-    )
-    try {
-        $baseUri = 'https://graph.microsoft.com/v1.0/servicePrincipals'
-        $body = @{
-            "principalId" = $ManagedIdentityId
-            "resourceId"  = $GraphId
-            "appRoleId"   = $ApiRoleId
-        } | ConvertTo-Json
-        $restParams = @{
-            Method      = "Post"
-            Uri         = "$baseUri/$($GraphId)/appRoleAssignedTo"
-            Body        = $body
-            Headers     = @{Authorization = "Bearer $Token" }
-            ContentType = 'Application/Json'
-        }
-        $roleRequest = Invoke-RestMethod @restParams
-        return $roleRequest
-    }
-    catch {
-        Write-Warning $_.Exception.Message
-    }
 }
 #endregion
 Connect-AzAccount -Tenant "powers-hell.com"
-$token = Get-AzAccessToken
+$token = Get-AzAccessToken -ResourceUrl "https://graph.microsoft.com"
 $roles = @(
     "DeviceManagementApps.ReadWrite.All", 
     "DeviceManagementConfiguration.Read.All", 
