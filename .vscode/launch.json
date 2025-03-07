@@ -23,7 +23,9 @@
             "request": "launch",
             "name": "PowerShell Launch Current File w/Args Prompt",
             "script": "${file}",
-            "args": [ "${command:SpecifyScriptArgs}" ],
+            "args": [
+                "${command:SpecifyScriptArgs}"
+            ],
             "cwd": "${file}"
         },
         {
@@ -31,7 +33,9 @@
             "request": "launch",
             "name": "PowerShell Launch DebugTest.ps1",
             "script": "${workspaceRoot}/DebugTest.ps1",
-            "args": ["-Count 55 -DelayMilliseconds 250"],
+            "args": [
+                "-Count 55 -DelayMilliseconds 250"
+            ],
             "cwd": "${workspaceRoot}"
         },
         {
@@ -54,6 +58,14 @@
             "name": "PowerShell Attach to Host Process",
             "processId": "${command:PickPSHostProcess}",
             "runspaceId": 1
+        },
+        {
+            "name": "Attach to PowerShell Functions",
+            "type": "PowerShell",
+            "request": "attach",
+            "customPipeName": "AzureFunctionsPSWorker",
+            "runspaceId": 1,
+            "preLaunchTask": "func: host start"
         }
     ]
 }
