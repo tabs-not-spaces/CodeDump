@@ -1,5 +1,5 @@
 if (!(Get-Module -Name MSAL.PS -ListAvailable -ErrorAction SilentlyContinue)) {
-    Install-Module -Name MSAL.PS -Scope CurrentUser -Force
+    Install-Module -Name MSAL.PS -Scope CurrentUser -Force -AcceptLicense
 }
 $clientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547" # well known Intune application Id
 $auth = Get-MsalToken -ClientId $clientId -deviceCode #deviceCode requires interaction and solves MFA challenges
