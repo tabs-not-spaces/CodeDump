@@ -3,7 +3,7 @@ function Add-GraphApiRoleToMSI {
     [cmdletbinding()]
     param (
         [parameter(Mandatory = $true)]
-        [string]$ApplicationName,
+        [string]$ApplicationName,     # add example names like  (e.g.,Fun-Tool, Helpfull-script, click-me, etc)
 
         [parameter(Mandatory = $true)]
         [string[]]$GraphApiRole,
